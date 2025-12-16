@@ -1,0 +1,223 @@
+"""Implementation of  models for phenological development in WOFOST
+
+Classes defined here:
+- DVS_Phenology: Implements the algorithms for phenologic development
+- Vernalisation:
+
+Written by: Allard de Wit (allard.dewit@wur.nl), April 2014
+Modified by Will Solow, 2024
+"""
+
+import datetime
+import pickle
+import numpy as np
+import torch
+
+from traitlets_pcse import HasTraits, Instance
+
+from model_engine.models.states_rates import (
+    ParamTemplate,
+    StatesTemplate,
+    RatesTemplate,
+    VariableKiosk,
+)
+from model_engine.inputs.input_providers import DFTensorWeatherDataContainer
+
+
+class Model:
+
+    def __init__(self) -> None:
+        pass
+
+    def reset(self, day: datetime.date) -> None:
+        """
+        Reset the model
+        """
+        pass
+
+    def calc_rates(self, day: datetime.date, drv: DFTensorWeatherDataContainer) -> None:
+        """
+        Calculate the rates of change for the state variables
+        """
+        raise NotImplementedError
+
+    def integrate(self, day: datetime.date, delt: float = 1.0) -> None:
+        """
+        Integrate the state variables
+        """
+        raise NotImplementedError
+
+    def get_output(self, va: list = None) -> torch.Tensor:
+        """
+        Return the output of the model
+        """
+        raise NotImplementedError
+
+    def update_model(self, new_state: torch.Tensor) -> None:
+        """
+        Update the model with new passed state
+        """
+        raise NotImplementedError
+
+    def set_model_params(self, args: dict[str, torch.Tensor]) -> None:
+        """
+        Set the model phenology parameters from dictionary
+        """
+        raise NotImplementedError
+
+    def get_params(self) -> dict[str, torch.Tensor]:
+        """
+        Return the model parameters as a dictionary
+        """
+        return {k: getattr(self.params, k) for k in self.params.trait_names()}
+
+    def save_model(self, path: str) -> None:
+        """
+        Save the model to pickle
+        """
+        with open(path, "wb") as fp:
+            pickle.dump(self.get_params(), fp)
+        fp.close()
+
+    def get_extra_states(self) -> dict[str, torch.Tensor]:
+        """
+        Get extra states not associated with states or rates classes
+        """
+        raise NotImplementedError
+
+    def set_extra_states(self, va: dict) -> None:
+        """
+        Set extra states not associated with states or rate classes"""
+        for k, v in va.items():
+            setattr(self, k, v)
+
+    def get_state_rates(self, va: list = None) -> list[dict, list]:
+        """
+        Return the states and rates
+        """
+        output_vars = [self.get_extra_states()]
+        if va is None:
+            for s in self.states._find_valid_variables():
+                output_vars.append(getattr(self.states, s))
+            for r in self.rates._find_valid_variables():
+                output_vars.append(getattr(self.rates, r))
+        else:
+            for v in va:
+                if v in self.states._find_valid_variables():
+                    output_vars.append(getattr(self.states, v))
+                elif v in self.rates._find_valid_variables():
+                    output_vars.append(getattr(self.rates, v))
+        return output_vars
+
+    def set_state_rates(self, va: list | dict) -> None:
+        """
+        Set all states and rates
+        """
+
+        if isinstance(va, dict):
+            self.set_extra_states(va[0])
+            for k, v in va[1].items():
+                if k in self.states._find_valid_variables():
+                    setattr(self.states, k, v)
+                elif k in self.rates._find_valid_variables():
+                    setattr(self.rates, k, v)
+
+        elif isinstance(va, list):
+            self.set_extra_states(va[0])
+
+            if len(va[1]) != len(self.states._find_valid_variables()) + len(self.rates._find_valid_variables()):
+                raise ValueError("Length of vars does not match states and rates")
+            for i, s in enumerate(self.states._find_valid_variables()):
+                setattr(self.states, s, va[1][i])
+            for j, r in enumerate(self.rates._find_valid_variables()):
+                setattr(self.rates, r, va[1][j + len(self.states._find_valid_variables())])
+
+    def get_state_rates_names(self) -> list:
+        """Get names of states and rates"""
+        output_vars = []
+        for s in self.states._find_valid_variables():
+            output_vars.append(s)
+        for r in self.rates._find_valid_variables():
+            output_vars.append(r)
+        return output_vars
+
+    def get_sub_models(self) -> list:
+        """
+        Get all sub models
+        """
+        return [value for value in self.__dict__.values() if isinstance(value, Model)]
+
+
+class TensorModel(HasTraits, Model):
+    """
+    Base class for model
+    """
+
+    states = Instance(StatesTemplate)
+    rates = Instance(RatesTemplate)
+    params = Instance(ParamTemplate)
+
+    def __init__(self, day: datetime.date, kiosk: VariableKiosk, parvalues: dict, device: torch.device) -> None:
+        """
+        Initialize the model with parameters and states
+        """
+        self.device = device
+        self.params = self.Parameters(parvalues, device=self.device)
+        self.kiosk = kiosk
+
+    def set_model_params(self, args: dict[str, torch.Tensor]) -> None:
+        """
+        Set the model phenology parameters from dictionary
+        Recurse over sub models as needed
+        """
+        sub_models = self.get_sub_models()
+        if isinstance(args, dict):
+            for k, v in args.items():
+                if k in self.params.trait_names():
+                    self.set_model_specific_params(k, v.squeeze(-1))
+                else:
+                    [s.set_model_params({k: v}) for s in sub_models]
+
+    def set_model_specific_params(params, k, v):
+        """Set the specific parameters to handle overrides as needed
+        Like casting to ints
+        """
+        raise NotImplementedError
+
+
+class BatchTensorModel(HasTraits, Model):
+    """
+    Base class for BatchTensorModel
+    """
+
+    states = Instance(StatesTemplate)
+    rates = Instance(RatesTemplate)
+    params = Instance(ParamTemplate)
+
+    def __init__(self, day: datetime.date, kiosk: VariableKiosk, parvalues: dict, device, num_models: int = 1):
+        """
+        Initialize the model with parameters and states
+        """
+        self.device = device
+        self.num_models = num_models
+        self.params = self.Parameters(parvalues, self.num_models, device=self.device)
+        self.kiosk = kiosk
+
+    def set_model_params(self, args: dict[str, torch.Tensor]) -> None:
+        """
+        Set the model phenology parameters from dictionary
+        and recurse over sub models
+        """
+        sub_models = self.get_sub_models()
+        if isinstance(args, dict):
+            for k, v in args.items():
+                if k in self.params.trait_names():
+                    self.set_model_specific_params(k, v.squeeze(1))
+                else:
+                    [s.set_model_params({k: v}) for s in sub_models]
+
+    def set_model_specific_params(params, k: str, v: torch.Tensor) -> None:
+        """Set the specific parameters to handle overrides as needed
+        Like casting to ints
+        """
+        raise NotImplementedError

@@ -1,0 +1,1327 @@
+# Parameters for Grape Phenology
+ModelParameters:
+  Base:
+    grape: &grape
+      #
+      # EMERGENCE
+      #
+      TBASEM:
+        - 8.19
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 25.0
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUMEM:
+        - 107
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+      #
+      # PHENOLOGICAL DEVELOPMENT
+      #
+      TSUM1:
+        - 223
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 659
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 581
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000
+        - temperature sum from ripe onwards
+        - ['C.d']
+      #
+      # PERENNIAL DEVELOPMENT
+      #
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      CSUMDB:
+        - 119.
+        - Chilling units required for endodormancy break
+        - ['C.d']
+  Sets:
+    "1":
+      <<: *grape
+    Aligote:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 11.14
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 15.15
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 259.44
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 703.93
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 729.58
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 14.92
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Alvarinho:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 10.47
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 15.25
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 286.09
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 739.65
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 879.65
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 33.19
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Auxerrois:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 10.67
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 15.12
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 263.58
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 672.24
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 776.12
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 31.83
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Barbera:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 11.2
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 33.58
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 259.79
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 718.3
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 544.25
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 27.28
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Cabernet_Franc:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 10.85
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 15.06
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 231.53
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 759.23
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 795.16
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 17.82
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Cabernet_Sauvignon:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 11.22
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 15.0
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 228.76
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 658.12
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 755.21
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 26.27
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Chardonnay:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 10.35
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 15.0
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 229.2
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 725.92
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 380.17
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 25.01
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Chenin_Blanc:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 11.19
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 15.07
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 229.07
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 663.26
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 375.25
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 16.14
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Concord:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 10.01
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 15.01
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 257.82
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 845.79
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 569.23
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 23.67
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Durif:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 11.08
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 16.14
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 259.16
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 672.82
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 803.29
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 28.25
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Gewurztraminer:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 10.49
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 16.32
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 235.58
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 705.67
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 853.13
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 30.3
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Green_Veltliner:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 11.22
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 16.39
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 250.02
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 670.57
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 905.63
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 18.63
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Grenache:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 11.56
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 17.82
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 226.94
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 693.86
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 319.65
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 23.99
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Lemberger:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 10.8
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 15.09
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 222.84
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 609.28
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 793.89
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 18.78
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Malbec:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 11.05
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 15.06
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 219.46
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 659.57
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 886.49
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 17.09
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Melon:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 10.51
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 42.33
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 267.71
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 735.08
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 827.06
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 32.7
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Merlot:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 11.41
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 15.22
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 232.23
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 676.45
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 615.08
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 17.68
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Mourvedre:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 11.67
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 15.48
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 242.45
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 680.82
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 810.78
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 22.55
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Muscat_Blanc:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 10.62
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 15.84
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 216.99
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 654.6
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 469.46
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 23.3
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Nebbiolo:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 10.34
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 33.4
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 303.49
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 784.89
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 982.04
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 39.29
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Petit_Verdot:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 11.28
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 16.85
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 274.56
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 768.63
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 536.3
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 18.04
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Pinot_Blanc:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 10.45
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 15.01
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 273.94
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 733.85
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 505.33
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 33.2
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Pinot_Gris:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 10.1
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 44.22
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 240.3
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 657.02
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 503.69
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 42.77
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Pinot_Noir:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 10.31
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 15.01
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 229.55
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 723.89
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 745.52
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 31.19
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Riesling:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 10.59
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 15.04
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 238.47
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 722.97
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 791.03
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 28.47
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Sangiovese:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 10.28
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 15.11
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 279.06
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 762.33
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 691.75
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 35.69
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Sauvignon_Blanc:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 11.64
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 16.47
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 238.1
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 659.23
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 959.45
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 14.64
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Semillon:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 11.23
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 15.0
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 226.42
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 656.53
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 693.87
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 18.66
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Tempranillo:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 11.35
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 28.22
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 229.89
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 659.12
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 514.77
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 17.61
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Viognier:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 10.76
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 15.1
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 257.76
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 728.67
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 892.66
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 29.54
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
+    Zinfandel:
+      CSUMDB:
+        - 119.0
+        - Chilling units required for endodormancy break
+        - ['C.d']
+      MLDORM:
+        - 12.7
+        - Number of daylight hours below which dormancy is induced
+        - ['hr']
+      Q10C:
+        - 2.17
+        - Regression factor for chilling units
+        - ['-']
+      TBASEM:
+        - 11.12
+        - Lower threshold temperature for budbreak
+        - ['C']
+      TEFFMX:
+        - 15.0
+        - maximum effective temperature for budbreak
+        - ['C']
+      TSUM1:
+        - 221.21
+        - temperature sum from budbreak to flowering
+        - ['C.d']
+      TSUM2:
+        - 655.55
+        - temperature sum from flowering to veraison
+        - ['C.d']
+      TSUM3:
+        - 467.08
+        - temperature sum from veraison to ripe
+        - ['C.d']
+      TSUM4:
+        - 1000.0
+        - temperature sum from ripe onwards
+        - ['C.d']
+      TSUMEM:
+        - 27.8
+        - temperature sum from endodorm to budbreak
+        - ['C.d']
