@@ -38,7 +38,6 @@ def load_named_pickles(folder_paths: list[str], target_name: str, args: Namespac
     return results
 
 
-
 def compute_str_stl_ndim2(mtl_arr: np.ndarray, mean: np.ndarray, std: np.ndarray):
     """Compute print string for when loading single STL model"""
     all_str = ""

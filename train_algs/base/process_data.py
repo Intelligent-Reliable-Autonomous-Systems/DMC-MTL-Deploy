@@ -21,6 +21,7 @@ from model_engine.inputs.input_providers import (
     WeatherDataProvider,
 )
 
+
 def process_data(model: nn.Module, data: list[pd.DataFrame]) -> None:
     """Process all of the initial data"""
 
@@ -62,9 +63,7 @@ def process_data(model: nn.Module, data: list[pd.DataFrame]) -> None:
     cultivar_data = np.array([d.loc[0, "CULTIVAR"] for d in data]) if "CULTIVAR" in data[0].columns else None
 
     for c in range(len(CULTIVARS[model.config.DataConfig.dtype])):
-        cultivar_inds = np.argwhere(
-            (c == cultivar_data)
-        ).flatten()
+        cultivar_inds = np.argwhere((c == cultivar_data)).flatten()
         if len(cultivar_inds) < 3:
             continue
 
@@ -189,5 +188,3 @@ def date_to_cyclic(date_str: str | datetime.date) -> list[np.ndarray]:
     year_cos = np.cos(2 * np.pi * day_of_year / 365)
 
     return [year_sin, year_cos]
-
-

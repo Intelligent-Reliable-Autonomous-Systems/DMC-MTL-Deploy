@@ -13,6 +13,7 @@ import torch
 import numpy as np
 from collections.abc import Iterable
 
+
 class Tensor(TraitType):
     """An AFGEN table trait"""
 
@@ -47,6 +48,7 @@ class NDArray(TraitType):
         elif isinstance(value, int):
             return np.array([value])
         self.error(obj, value)
+
 
 class VariableKiosk(dict):
     """VariableKiosk for registering and publishing state variables in PCSE."""

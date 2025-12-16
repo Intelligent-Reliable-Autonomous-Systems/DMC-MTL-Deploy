@@ -62,14 +62,17 @@ class DConfig:
     """Hidden dim of Model"""
     hidden_dim: Optional[int] = None
 
+
 @dataclass
 class DataConfig:
     """Path to real data"""
+
     data_fpath: Optional[str] = True
     """Data type (cold-hardiness, phenology, wheat)"""
     dtype: Optional[str] = None
     """Cultivar"""
     cultivar: Optional[str] = None
+
 
 @dataclass
 class Args:
@@ -123,7 +126,6 @@ def load_config_data_fpath(
 
     config = OmegaConf.load(f"{fpath}/config.yaml")
     config = OmegaConf.merge(Args, config)
-
 
     return config, load_data_from_config(config), fpath
 

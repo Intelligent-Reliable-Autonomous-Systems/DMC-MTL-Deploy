@@ -54,7 +54,6 @@ class EmbeddingFCGRU(BaseModule):
         input: torch.Tensor = None,
         hn: torch.Tensor = None,
         cultivars: torch.Tensor = None,
-
         **kwargs,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         cult_embed = self.cult_embedding_layer(self.cult_mapping[cultivars.flatten().to(torch.int)])
@@ -74,5 +73,3 @@ class EmbeddingFCGRU(BaseModule):
         params = self.hidden_to_params(out).squeeze(0)
 
         return params, hn
-
-

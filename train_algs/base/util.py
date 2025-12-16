@@ -24,6 +24,7 @@ def set_embedding_op(model: nn.Module) -> int:
     Set the embedding operation to be used
     in MultiTask Embedding Models
     """
+
     def concat(embed, input):
         return torch.concatenate((embed, input), dim=-1)
 
@@ -220,4 +221,3 @@ def log_error_training(
     p_str += f"Model Grad Norm: {grad/len(calibrator.data['train'])}\n"
 
     print(p_str)
-

@@ -215,13 +215,14 @@ class ParamRNN(BaseRNN):
 
         return output_tens, param_tens, None
 
+
 class NoObsParamRNN(BaseRNN):
 
     def __init__(self, config: DictConfig, data: list[pd.DataFrame]) -> None:
 
         super(NoObsParamRNN, self).__init__(config, data)
 
-        self.model =BatchModelEngine(
+        self.model = BatchModelEngine(
             num_models=self.batch_size,
             config=config.PConfig,
             inputprovider=self.input_data,

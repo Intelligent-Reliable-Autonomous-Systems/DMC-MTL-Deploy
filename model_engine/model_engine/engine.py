@@ -93,7 +93,6 @@ class BaseEngine(HasTraits):
         """
         raise NotImplementedError
 
-
     def add_variables(self, drv: DFTensorWeatherDataContainer, **kwargs) -> DFTensorWeatherDataContainer:
         """
         Add additional variables to the daily driving variables to be passed to model
@@ -298,5 +297,3 @@ class BatchModelEngine(BaseEngine):
         self.model.set_state_rates([extra_vars, state_rates])
 
         return self.get_output()
-
-

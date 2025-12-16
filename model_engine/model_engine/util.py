@@ -82,8 +82,8 @@ CULTIVARS = {
         ],
         dtype=str,
     ),
-  
 }
+
 
 def param_loader(config: dict) -> dict:
     """
@@ -167,5 +167,3 @@ def get_models(folder_path: str) -> list[type]:
             constructors = constructors | constr
 
     return constructors
-
-

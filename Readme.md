@@ -11,7 +11,7 @@ Correspondance to Will Solow, soloww@oregonstate.edu
 * `conda activate dmc-deploy`
 
 2. Clone this repository
-* `git clone git@github.com:wsolow/param-calib.git`
+* `https://github.com/Intelligent-Reliable-Autonomous-Systems/DMC-MTL-Deploy`
 
 3. Install dependencies with pip
 * `pip install -e model_engine`
