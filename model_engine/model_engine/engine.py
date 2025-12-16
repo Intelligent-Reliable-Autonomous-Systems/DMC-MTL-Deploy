@@ -26,8 +26,7 @@ import pandas as pd
 from omegaconf import DictConfig
 
 from model_engine.util import param_loader, get_models
-from model_engine.inputs.nasapower import NASAPowerWeatherDataProvider, WeatherDataProvider
-from model_engine.inputs.input_providers import DFTensorWeatherDataContainer
+from model_engine.inputs.input_providers import DFTensorWeatherDataContainer, WeatherDataProvider
 from model_engine.models.base_model import BatchTensorModel
 from model_engine.models.states_rates import VariableKiosk
 
@@ -56,10 +55,7 @@ class BaseEngine(HasTraits):
 
         self.model_constr = get_models(f"{os.path.dirname(os.path.abspath(__file__))}/models")[config.model]
 
-        if inputprovider is None:
-            self.inputdataprovider = NASAPowerWeatherDataProvider(self.config.latitude, self.config.longitude)
-        else:
-            self.inputdataprovider = inputprovider
+        self.inputdataprovider = inputprovider
 
     def run(self, dates: datetime.date = None, days: int = 1) -> torch.Tensor:
         """
@@ -77,27 +73,6 @@ class BaseEngine(HasTraits):
         Helper function for run. Implemented by subclasses
         """
         raise NotImplementedError
-
-    def run_all(self, end_date=datetime.date(2000, 9, 7), same_yr: bool = True) -> pd.DataFrame:
-        """
-        Run a simulation through termination
-        Generally used to generate synthetic data
-        """
-        start_date = self.day.astype("datetime64[D]").astype(object)
-        end_date = end_date.replace(year=start_date.year) if same_yr else end_date.replace(year=start_date.year + 1)
-        df = pd.DataFrame(index=range((end_date - start_date).days), columns=self.output_vars + self.input_vars)
-
-        inp = self.get_input(self.day)  # Do this first for correct ordering of input
-        out = self.get_output().cpu().numpy().flatten()
-
-        df.loc[0] = np.concatenate((out, inp))
-        i = 1
-        while self.day < end_date:
-            inp = self.get_input(np.datetime64(self.day.astype("datetime64[D]").tolist() + datetime.timedelta(days=1)))
-            out = self.run().cpu().numpy().flatten()
-            df.loc[i] = np.concatenate((out, inp))
-            i += 1
-        return df
 
     def get_state_rates_names(self) -> list[str]:
         """
@@ -118,11 +93,6 @@ class BaseEngine(HasTraits):
         """
         raise NotImplementedError
 
-    def update_internal_model(self, new_state: torch.Tensor, changed_states: torch.Tensor) -> None:
-        """
-        Update internal model state
-        """
-        raise NotImplementedError
 
     def add_variables(self, drv: DFTensorWeatherDataContainer, **kwargs) -> DFTensorWeatherDataContainer:
         """
@@ -283,32 +253,6 @@ class BatchModelEngine(BaseEngine):
         Integrate rates with states based on time change (delta)
         """
         self.model.integrate(day, delt)
-
-    def update_internal_model(self, new_state: torch.Tensor, changed_states: torch.Tensor) -> None:
-        """
-        Update the internal model with new state
-        """
-        new_state = (
-            F.pad(
-                new_state,
-                (0, self.num_models - len(new_state)),
-                mode="constant",
-                value=0,
-            )
-            if len(new_state) < self.num_models
-            else new_state
-        )
-        changed_states = (
-            F.pad(
-                changed_states,
-                (0, self.num_models - len(changed_states)),
-                mode="constant",
-                value=False,
-            )
-            if len(changed_states) < self.num_models
-            else changed_states
-        )
-        self.model.update_model(new_state, changed_states)
 
     def set_model_params(self, new_params: torch.Tensor, param_list: list) -> None:
         """
