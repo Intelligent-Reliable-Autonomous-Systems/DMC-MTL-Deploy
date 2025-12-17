@@ -7,7 +7,7 @@ Correspondance to Will Solow, soloww@oregonstate.edu
 ### Installation
 
 1. Create a virtual environment 
-* `conda create -n dmc-deploy python=3.11`
+* `conda create -n dmc-deploy python=3.12`
 * `conda activate dmc-deploy`
 
 2. Clone this repository

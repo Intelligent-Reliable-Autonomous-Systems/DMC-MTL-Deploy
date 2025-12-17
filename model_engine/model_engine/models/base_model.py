@@ -10,7 +10,6 @@ Modified by Will Solow, 2024
 
 import datetime
 import pickle
-import numpy as np
 import torch
 
 from traitlets_pcse import HasTraits, Instance
@@ -146,43 +145,6 @@ class Model:
         Get all sub models
         """
         return [value for value in self.__dict__.values() if isinstance(value, Model)]
-
-
-class TensorModel(HasTraits, Model):
-    """
-    Base class for model
-    """
-
-    states = Instance(StatesTemplate)
-    rates = Instance(RatesTemplate)
-    params = Instance(ParamTemplate)
-
-    def __init__(self, day: datetime.date, kiosk: VariableKiosk, parvalues: dict, device: torch.device) -> None:
-        """
-        Initialize the model with parameters and states
-        """
-        self.device = device
-        self.params = self.Parameters(parvalues, device=self.device)
-        self.kiosk = kiosk
-
-    def set_model_params(self, args: dict[str, torch.Tensor]) -> None:
-        """
-        Set the model phenology parameters from dictionary
-        Recurse over sub models as needed
-        """
-        sub_models = self.get_sub_models()
-        if isinstance(args, dict):
-            for k, v in args.items():
-                if k in self.params.trait_names():
-                    self.set_model_specific_params(k, v.squeeze(-1))
-                else:
-                    [s.set_model_params({k: v}) for s in sub_models]
-
-    def set_model_specific_params(params, k, v):
-        """Set the specific parameters to handle overrides as needed
-        Like casting to ints
-        """
-        raise NotImplementedError
 
 
 class BatchTensorModel(HasTraits, Model):

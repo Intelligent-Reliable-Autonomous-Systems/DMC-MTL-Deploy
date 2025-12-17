@@ -14,8 +14,6 @@ import datetime as dt
 import pickle
 import pandas as pd
 
-from model_engine.inputs.weather_util import DEVICE
-
 
 class SlotPickleMixin(object):
     """This mixin makes it possible to pickle/unpickle objects with __slots__ defined.
@@ -46,9 +44,10 @@ class DFTensorWeatherDataContainer(SlotPickleMixin):
 
     __slots__ = []
 
-    def __init__(self, *args: list, **kwargs: dict) -> None:
+    def __init__(self, device: str = "cpu", *args: list, **kwargs: dict) -> None:
 
         self.__slots__ = list(kwargs.keys())
+        self.device = device
 
         # only keyword parameters should be used for weather data container
         if len(args) > 0:
@@ -60,9 +59,11 @@ class DFTensorWeatherDataContainer(SlotPickleMixin):
         # Set all attributes
         for k, v in kwargs.items():
             if isinstance(v, float) or isinstance(v, int):
-                setattr(self, k, torch.tensor([v]).to(DEVICE))
+                setattr(self, k, torch.tensor([v]).to(self.device))
             elif isinstance(v, torch.Tensor):
-                setattr(self, k, v.to(DEVICE))
+                setattr(self, k, v.to(self.device))
+            elif isinstance(v, np.ndarray):
+                setattr(self, k, torch.tensor(v).to(self.device))
             else:
                 setattr(self, k, v)
 
@@ -85,8 +86,9 @@ class WeatherDataProvider(object):
     angstB = None
     ETmodel = "PM"
 
-    def __init__(self) -> None:
+    def __init__(self, device: str = "cpu") -> None:
         self.store = {}
+        self.device = device
 
     def _dump(self, cache_fname: str) -> None:
         """Dumps the contents into cache_fname using pickle.
@@ -209,14 +211,14 @@ class WeatherDataProvider(object):
                     zip(
                         slots,
                         [np.empty(shape=len(keydate), dtype=object)]
-                        + [torch.empty(size=(len(keydate),)).to(DEVICE) for _ in range(len(slots) - 1)],
+                        + [torch.empty(size=(len(keydate),)).to(self.device) for _ in range(len(slots) - 1)],
                     )
                 )
                 for i, key in enumerate(keydate):
                     weather = self.store[key, cultivar[i]]
                     for s in slots:
                         vals[s][i] = getattr(weather, s)
-                return DFTensorWeatherDataContainer(**vals)
+                return DFTensorWeatherDataContainer(device=self.device, **vals)
             else:
                 return self.store[keydate, cultivar]
         except KeyError as e:
@@ -231,9 +233,9 @@ class MultiTensorWeatherDataProvider(WeatherDataProvider):
     for the daily weather in the batch setting
     """
 
-    def __init__(self, df: pd.DataFrame = None) -> None:
+    def __init__(self, df: pd.DataFrame = None, device: str = "cpu") -> None:
 
-        WeatherDataProvider.__init__(self)
+        WeatherDataProvider.__init__(self, device=device)
 
         if df is not None:
             self._get_and_process_DF(df)
@@ -257,7 +259,7 @@ class MultiTensorWeatherDataProvider(WeatherDataProvider):
             self.values = (
                 torch.tensor(df.drop(columns=["DAY", "CULTIVAR"], inplace=False).to_numpy())
                 .to(torch.float32)
-                .to(DEVICE)
+                .to(self.device)
             )
         else:
             self.keys = dict(
@@ -289,7 +291,7 @@ class MultiTensorWeatherDataProvider(WeatherDataProvider):
         """
         with open(cache_fname, "rb") as fp:
             (self.keys, self.values, self.attrs) = pickle.load(fp)
-            self.values = torch.tensor(self.values).to(DEVICE)
+            self.values = torch.tensor(self.values).to(self.device)
 
     def check_keydate(self, key: dt.datetime | dt.date | np.datetime64 | np.ndarray | list) -> str:
         """Check representations of date for storage/retrieval of weather data.
@@ -349,12 +351,12 @@ class MultiTensorWeatherDataProvider(WeatherDataProvider):
                 inds = [self.keys[keydate[i], cultivar[i]] for i in range(len(keydate))]
                 vals = torch.split(self.values[inds], 1, dim=1)
                 vals = dict(zip(self.attrs, [v.squeeze() for v in vals]))
-                return DFTensorWeatherDataContainer(**vals)
+                return DFTensorWeatherDataContainer(device=self.device, **vals)
             else:
                 inds = self.keys[keydate, cultivar]
                 vals = torch.split(self.values[inds], 1, dim=0)
                 vals = dict(zip(self.attrs, [v.squeeze() for v in vals]))
-                return DFTensorWeatherDataContainer(**vals)
+                return DFTensorWeatherDataContainer(device=self.device, **vals)
         except KeyError as e:
             msg = "No weather data for %s." % keydate
             raise Exception(msg)

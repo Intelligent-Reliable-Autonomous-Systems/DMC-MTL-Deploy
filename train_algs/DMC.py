@@ -63,6 +63,7 @@ class BaseRNN(BaseModel):
         with open(f"{log_path}/config.yaml", "w", encoding="utf-8") as fp:
             OmegaConf.save(config=self.config, f=fp.name)
         fp.close()
+        torch.save(self.drange, f"{log_path}/model_drange.pt")
 
         self.best_cum_rmse = float("inf")
         self.best_eval_loss = float("inf")

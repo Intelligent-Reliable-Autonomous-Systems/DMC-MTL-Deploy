@@ -81,7 +81,7 @@ class Grape_Phenology_TensorBatch(BatchTensorModel):
         super().__init__(day, kiosk, parvalues, device, num_models=self.num_models)
 
         # Define initial states
-        self._STAGvarsE = ["ecodorm" for _ in range(self.num_models)]
+        self._STAGE = ["ecodorm" for _ in range(self.num_models)]
         self.states = self.StateVariables(
             num_models=self.num_models,
             TSUM=0.0,
@@ -130,10 +130,8 @@ class Grape_Phenology_TensorBatch(BatchTensorModel):
 
         # Compute DTSUM values. If the DRV has a temperature response function
         # then use that instead
-        if hasattr(drv, "TRESP"):
-            dtsum_update = torch.clamp(drv.TRESP, self.min_tensor, p.TEFFMX)
-        else:
-            dtsum_update = torch.clamp(drv.TEMP - p.TBASEM, self.min_tensor, p.TEFFMX)
+        dtsum_update = torch.clamp(drv.TEMP - p.TBASEM, self.min_tensor, p.TEFFMX)
+
         # Apply DTSUM updates only where each stage condition is met
         r.DTSUM = torch.where(
             self._endodorm | self._budbreak | self._bloom | self._veraison | self._ripe,

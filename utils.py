@@ -20,7 +20,7 @@ from torch import nn
 from omegaconf import OmegaConf, DictConfig
 from model_engine.util import CULTIVARS
 
-from train_algs import DMC
+from train_algs import DMC, DMC_Inference
 
 
 @dataclass
@@ -106,7 +106,6 @@ def load_config_data(args: Namespace) -> tuple[DictConfig, list[pd.DataFrame]]:
 
     config = OmegaConf.load(f"_train_configs/{args.config}.yaml")
     config = OmegaConf.merge(Args, config)
-    config.seed = int(args.seed)
 
     if hasattr(args, "cultivar"):
         config.DataConfig.cultivar = args.cultivar if args.cultivar is not None else config.DataConfig.cultivar
@@ -128,6 +127,22 @@ def load_config_data_fpath(
     config = OmegaConf.merge(Args, config)
 
     return config, load_data_from_config(config), fpath
+
+
+def load_config_fpath(
+    args: Namespace,
+) -> tuple[DictConfig, list[pd.DataFrame], str]:
+    """
+    Loads configuration file and data and returns
+    filepath to load model
+    """
+
+    fpath = f"{os.getcwd()}/{args.config}"
+
+    config = OmegaConf.load(f"{fpath}/config.yaml")
+    config = OmegaConf.merge(Args, config)
+
+    return config, fpath
 
 
 def load_data_from_config(config: DictConfig) -> list[pd.DataFrame]:
@@ -202,6 +217,22 @@ def load_model_from_config(config: DictConfig, data: list[pd.DataFrame]) -> nn.M
         calibrator = DMC.ParamRNN(config, data)
     elif config.DConfig.type == "NoObsParam":
         calibrator = DMC.NoObsParamRNN(config, data)
+    else:
+        raise NotImplementedError(f"Unrecognized RNN model type `{config.DConfig.type}`")
+
+    return calibrator
+
+
+def load_inference_model_from_config(config: DictConfig, fpath: str, pt_file_name: str = "rnn_model.pt") -> nn.Module:
+    """
+    Load the model to train using the configuration and pass
+    it args and data
+    """
+
+    if config.DConfig.type == "Param":
+        calibrator = DMC_Inference.InferenceParamRNN(config, fpath, pt_file_name=pt_file_name)
+    elif config.DConfig.type == "NoObsParam":
+        calibrator = DMC_Inference.InferenceNoObsParamRNN(config, fpath, pt_file_name=pt_file_name)
     else:
         raise NotImplementedError(f"Unrecognized RNN model type `{config.DConfig.type}`")
 

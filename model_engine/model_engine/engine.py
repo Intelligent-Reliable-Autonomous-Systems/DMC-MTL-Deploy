@@ -50,8 +50,9 @@ class BaseEngine(HasTraits):
         self.day = self.start_date
         self.kiosk = VariableKiosk()
 
-        self.output_vars = self.config["output_vars"]
-        self.input_vars = self.config["input_vars"]
+        self.output_vars = self.config.output_vars
+        self.input_vars = self.config.input_vars
+        self.weather_input_vars = [x for x in self.input_vars if x != "DAY"]
 
         self.model_constr = get_models(f"{os.path.dirname(os.path.abspath(__file__))}/models")[config.model]
 
@@ -93,42 +94,6 @@ class BaseEngine(HasTraits):
         """
         raise NotImplementedError
 
-    def add_variables(self, drv: DFTensorWeatherDataContainer, **kwargs) -> DFTensorWeatherDataContainer:
-        """
-        Add additional variables to the daily driving variables to be passed to model
-        """
-        if "TRESP" in kwargs:
-            if kwargs["TRESP"] is not None:
-                temp_response = kwargs["TRESP"].flatten()
-                temp_response = (
-                    F.pad(
-                        temp_response,
-                        (0, self.num_models - len(temp_response)),
-                        mode="constant",
-                        value=0,
-                    )
-                    if len(temp_response) < self.num_models
-                    else temp_response
-                )
-                drv.TRESP = temp_response
-
-        if "ADDL" in kwargs:
-            if kwargs["ADDL"] is not None:
-                addv_latent_state = kwargs["ADDL"].flatten()
-                addv_latent_state = (
-                    F.pad(
-                        addv_latent_state,
-                        (0, self.num_models - len(addv_latent_state)),
-                        mode="constant",
-                        value=0,
-                    )
-                    if len(addv_latent_state) < self.num_models
-                    else addv_latent_state
-                )
-                drv.ADDL = addv_latent_state
-
-        return drv
-
 
 class BatchModelEngine(BaseEngine):
     """
@@ -157,9 +122,6 @@ class BatchModelEngine(BaseEngine):
             self.device,
             num_models=self.num_models,
         )
-        assert isinstance(
-            self.model, BatchTensorModel
-        ), "Model specified is not a Batch Tensor Model, but we are using the BatchModelEngine as a wrapper!"
 
     def reset(self, num_models: int = 1, year: int = None, day: datetime.date = None) -> torch.Tensor:
         """
@@ -177,66 +139,69 @@ class BatchModelEngine(BaseEngine):
 
         return self.get_output()[:num_models]
 
-    def run(self, dates: datetime.date = None, cultivars: list[int] = None, days: int = 1, **kwargs) -> torch.Tensor:
+    def run(
+        self, weather_data: torch.Tensor = None, dates: np.ndarray = None, cultivars: list[int] = None
+    ) -> torch.Tensor:
         """
         Advances the system state with given number of days
         """
-        days_done = 0
-        while days_done < days:
-            days_done += 1
-            self._run(dates=dates, cultivars=cultivars, **kwargs)
+
+        self._run(weather_data=weather_data, dates=dates, cultivars=cultivars)
+
         return self.get_output()[: len(dates)] if dates is not None else self.get_output()
 
     def _run(
-        self, dates: datetime.date = None, cultivars: torch.Tensor = None, delt: float = 1, **kwargs
+        self,
+        weather_data: torch.Tensor = None,
+        dates: datetime.date = None,
+        cultivars: torch.Tensor = None,
+        delt: float = 1,
     ) -> torch.Tensor:
         """
         Make one time step of the simulation.
         """
-        if dates is None:
-            self.day += np.timedelta64(1, "D")
-            days = self.day
-            drv = self.inputdataprovider(self.day, -1)
-            drv.to_tensor(self.device)
-        else:
+        if weather_data is None:
             self.day = dates
-            # Need to pad outputs to align with batch, we will ignore these in output
-            if cultivars is None:
-                days = (
-                    np.pad(
-                        self.day,
-                        (0, self.num_models - len(self.day)),
-                        mode="constant",
-                        constant_values=self.day[-1],
-                    )
-                    if len(self.day) < self.num_models
-                    else self.day
-                )
-                drv = self.inputdataprovider(days, np.tile(-1, len(days)))
-            else:
-                days = (
-                    np.pad(
-                        self.day,
-                        (0, self.num_models - len(self.day)),
-                        mode="constant",
-                        constant_values=self.day[-1],
-                    )
-                    if len(self.day) < self.num_models
-                    else self.day
-                )
-                cultivars = (
-                    F.pad(
-                        cultivars,
-                        (0, 0, 0, self.num_models - len(cultivars)),
-                        mode="constant",
-                        value=float(cultivars[-1].cpu().numpy().flatten()),
-                    )
-                    if len(cultivars) < self.num_models
-                    else cultivars
-                )
-                drv = self.inputdataprovider(days, cultivars)
 
-        drv = self.add_variables(drv, **kwargs)
+            days = (
+                np.pad(
+                    self.day,
+                    (0, self.num_models - len(self.day)),
+                    mode="constant",
+                    constant_values=self.day[-1],
+                )
+                if len(self.day) < self.num_models
+                else self.day
+            )
+            cultivars = (
+                F.pad(
+                    cultivars,
+                    (0, 0, 0, self.num_models - len(cultivars)),
+                    mode="constant",
+                    value=float(cultivars[-1].cpu().numpy().flatten()),
+                )
+                if len(cultivars) < self.num_models
+                else cultivars
+            )
+        else:
+            n_pad = self.num_models - weather_data.shape[0]
+            days = (
+                np.pad(
+                    dates,
+                    (0, self.num_models - len(dates)),
+                    mode="constant",
+                    constant_values=dates[-1],
+                )
+                if len(dates) < self.num_models
+                else dates
+            )
+            if n_pad > 0:
+                weather_data = np.vstack([weather_data, np.tile(weather_data[-1:], (n_pad, 1))])
+        if self.inputdataprovider is None:
+            weather = dict(zip(self.weather_input_vars, [w for w in weather_data.transpose()]))
+            drv = DFTensorWeatherDataContainer(device=self.device, **weather)
+        else:
+            drv = self.inputdataprovider(days, cultivars)
 
         self.calc_rates(days, drv)
         self.integrate(days, delt)

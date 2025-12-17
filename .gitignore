@@ -4,8 +4,6 @@
 *output/
 *.out
 *.err
-*.pt
-*.pth
 *_HPC/
 data.txt
 *.DS_Store

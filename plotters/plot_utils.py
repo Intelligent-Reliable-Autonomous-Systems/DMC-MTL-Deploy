@@ -12,84 +12,12 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
-import matplotlib.pyplot as plt
 
 from model_engine.util import PHENOLOGY_INT
 from plotters.plotting_functions import (
     plot_output_phenology,
     plot_output_coldhardiness,
-    plot_output_wofost,
-    plot_output_coldhardiness_error,
 )
-
-
-def compute_obs_RMSE(true: list[np.ndarray], model: list[np.ndarray]) -> tuple[np.ndarray, np.ndarray]:
-    """
-    Computes RMSE of per observation
-    """
-    if isinstance(true, np.ndarray):
-        true = [true]
-        model = [model]
-
-    max_len = 0
-    for t in true:
-        max_len = len(t) if len(t) > max_len else max_len
-
-    samples = np.zeros(shape=max_len)
-    avgs = np.zeros(shape=max_len)
-
-    for i in range(len(true)):
-        for j in range(len(true[i])):
-            avgs[j] += (true[i][j] - model[i][j]) ** 2
-            samples[j] += 1
-
-    samples = np.where(samples == 0, 1, samples)  # ignore divde by zero
-
-    return np.sqrt(avgs / samples), None
-
-
-def compute_total_RMSE(true: list[np.ndarray], model: list[np.ndarray]) -> tuple[np.ndarray, np.ndarray]:
-    """
-    Computes total RMSE across entire dataset
-    """
-
-    avgs = 0
-    samples = 0
-    if isinstance(true, np.ndarray):
-        true = [true]
-        model = [model]
-
-    for i in range(len(true)):
-        avgs += np.sum((true[i] - model[i]) ** 2)
-        samples += len(true[i])
-    if samples == 0:
-        return 0, None
-    else:
-        return np.sqrt(avgs / samples), None
-
-
-def compute_day_RMSE(
-    true: list[np.ndarray], model: list[np.ndarray], inds: list[np.ndarray], days: int = None
-) -> tuple[np.ndarray, np.ndarray]:
-    """
-    Computes RMSE up to a given day
-    """
-
-    avgs = 0
-    samples = 0
-    if isinstance(true, np.ndarray):
-        true = [true]
-        model = [model]
-
-    for i in range(len(true)):
-        k = (inds[i] >= days) * (inds[i] < (days + 30))
-        avgs += np.sum((true[i][k] - model[i][k]) ** 2)
-        samples += np.sum(k)
-    if samples == 0:
-        return 0
-    else:
-
-        return np.sqrt(avgs / samples)
 
 
 def gen_batch_data(
@@ -175,17 +103,6 @@ def gen_all_data_and_plot(
             )
         elif "grape_coldhardiness" in config.DataConfig.dtype:
             inds = plot_output_coldhardiness(
-                config,
-                fpath,
-                np.arange(start=i, stop=i + calibrator.batch_size),
-                output,
-                params,
-                calibrator.val[name][i : i + calibrator.batch_size],
-                name=name,
-                save=args.save,
-            )
-        elif "wofost" in config.DataConfig.dtype:
-            inds = plot_output_wofost(
                 config,
                 fpath,
                 np.arange(start=i, stop=i + calibrator.batch_size),

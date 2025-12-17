@@ -12,8 +12,6 @@ from math import radians
 import numpy as np
 import torch
 
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 ###############################################################
 # Used for Crop models to calculate daylength for development
 ###############################################################

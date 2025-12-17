@@ -22,6 +22,18 @@ from model_engine.inputs.input_providers import (
 )
 
 
+def process_data_inference(model: nn.Module) -> None:
+    """Process all of the initial data"""
+
+    model.output_vars = model.config.PConfig.output_vars
+    model.input_vars = model.config.PConfig.input_vars
+
+    model.params = model.config.params
+    model.params_range = torch.tensor(np.array(model.config.params_range, dtype=np.float32)).to(model.device)
+
+    model.num_cultivars = len(CULTIVARS)
+
+
 def process_data(model: nn.Module, data: list[pd.DataFrame]) -> None:
     """Process all of the initial data"""
 
@@ -43,7 +55,9 @@ def process_data(model: nn.Module, data: list[pd.DataFrame]) -> None:
     # Get input data for use with model to avoid unnormalizing
     extra_feats = ["CULTIVAR"]
     extra_feats = extra_feats + ["DAY"] if "DAY" not in model.input_vars else extra_feats
-    model.input_data = make_tensor_inputs(model.config, [d.loc[:, model.input_vars + extra_feats] for d in data])
+    model.input_data = make_tensor_inputs(
+        model.config, [d.loc[:, model.input_vars + extra_feats] for d in data], device=model.device
+    )
 
     # Get validation data
     output_data, output_range = embed_output([d.loc[:, model.output_vars] for d in data])
@@ -113,13 +127,13 @@ def process_data(model: nn.Module, data: list[pd.DataFrame]) -> None:
         raise Exception("Insuffient per-cultivar data to build test set")
 
 
-def make_tensor_inputs(config: DictConfig, dfs: list[pd.DataFrame]) -> WeatherDataProvider:
+def make_tensor_inputs(config: DictConfig, dfs: list[pd.DataFrame], device="cpu") -> WeatherDataProvider:
     """
     Make input providers based on the given data frames
     Converts data frames to tensor table
     """
 
-    wp = MultiTensorWeatherDataProvider(pd.concat(dfs, ignore_index=True))
+    wp = MultiTensorWeatherDataProvider(pd.concat(dfs, ignore_index=True), device=device)
 
     return wp
 
@@ -172,19 +186,44 @@ def embed_output(data: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
     return tens, torch.tensor(np.stack((data_mean, data_std), axis=-1))
 
 
-def date_to_cyclic(date_str: str | datetime.date) -> list[np.ndarray]:
+def date_to_cyclic(date_str: str | datetime.date | np.ndarray) -> np.ndarray:
     """
     Convert datetime to cyclic embedding
     """
-    if isinstance(date_str, str):
-        date_obj = datetime.datetime.strptime(date_str, "%Y-%m-%d")
-    elif isinstance(date_str, datetime.date):
-        date_obj = date_str
+    if isinstance(date_str, np.ndarray):
+        dt_arr = []
+        for dt64 in date_str:
+            dt = dt64.astype("datetime64[us]").item()
+            day_of_year = dt.timetuple().tm_yday
+            year_sin = np.sin(2 * np.pi * day_of_year / 365)
+            year_cos = np.cos(2 * np.pi * day_of_year / 365)
+            dt_arr.append([year_sin, year_cos])
+        return np.array(dt_arr)
     else:
-        msg = "Invalid type to convert to date"
-        raise Exception(msg)
-    day_of_year = date_obj.timetuple().tm_yday
-    year_sin = np.sin(2 * np.pi * day_of_year / 365)
-    year_cos = np.cos(2 * np.pi * day_of_year / 365)
+        if isinstance(date_str, str):
+            date_obj = datetime.datetime.strptime(date_str, "%Y-%m-%d")
+        elif isinstance(date_str, datetime.date):
+            date_obj = date_str
+        else:
+            msg = "Invalid type to convert to date"
+            raise Exception(msg)
 
-    return [year_sin, year_cos]
+        day_of_year = date_obj.timetuple().tm_yday
+        year_sin = np.sin(2 * np.pi * day_of_year / 365)
+        year_cos = np.cos(2 * np.pi * day_of_year / 365)
+
+        return np.array([year_sin, year_cos])
+
+
+def normalize(data: torch.Tensor | np.ndarray, drange: torch.Tensor | np.ndarray) -> torch.Tensor | np.ndarray:
+    """
+    Normalize data given a range
+    """
+    return (data - drange[:, 0]) / (drange[:, 1] + EPS)
+
+
+def unnormalize(data: torch.Tensor | np.ndarray, drange: torch.Tensor | np.ndarray) -> torch.Tensor | np.ndarray:
+    """
+    Unnormalize data given a range
+    """
+    return data * (drange[:, 1] + EPS) + drange[:, 0]
