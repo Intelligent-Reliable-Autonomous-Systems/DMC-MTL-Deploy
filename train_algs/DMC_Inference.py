@@ -69,7 +69,7 @@ class InferenceParamRNN(BaseInferenceRNN):
         """
 
         self.nn.zero_grad()
-        self.model.reset(self.batch_size)
+        self.model.reset()
 
     def infer(self, data: np.ndarray, dates: np.ndarray, cultivars: np.ndarray) -> np.ndarray:
         """
@@ -126,7 +126,7 @@ class InferenceParamRNN(BaseInferenceRNN):
             self.task_params[cultivars.to(torch.long).squeeze()] if cultivars is not None else self.task_params[0]
         )
         self.model.set_model_params(batch_params, self.params)
-        output = self.model.reset(b_size)
+        output = self.model.reset()[:b_size]
 
         # Run through entirety of time series predicting params
         for i in range(dlen):
@@ -155,7 +155,6 @@ class InferenceNoObsParamRNN(BaseInferenceRNN):
         self.model = BatchModelEngine(
             num_models=self.batch_size,
             config=config.PConfig,
-            inputprovider=self.input_data,
             device=self.device,
         )
 
@@ -173,7 +172,7 @@ class InferenceNoObsParamRNN(BaseInferenceRNN):
 
         self.nn.zero_grad()
         hn_cn = self.nn.get_init_state(batch_size=b_size)
-        output = self.model.reset(b_size)
+        output = self.model.reset()[:b_size]
         # Run through entirety of time series predicting parameters for physical model at each step
         for i in range(dlen):
 

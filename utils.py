@@ -20,7 +20,7 @@ from torch import nn
 from omegaconf import OmegaConf, DictConfig
 from model_engine.util import CULTIVARS
 
-from train_algs import DMC, DMC_Inference
+from train_algs import DMC_Inference
 
 
 @dataclass
@@ -83,7 +83,6 @@ class Args:
     DConfig: object = DConfig
     """Data Args"""
     DataConfig: object = DataConfig
-
     """Path to save model"""
     log_path: Optional[str] = None
     """Run name for experiment"""
@@ -94,39 +93,7 @@ class Args:
     params: Optional[list] = None
     """Ranges for each parameter to predict"""
     params_range: Optional[list] = None
-    """Parameters smoothing coefficient"""
-    param_scale: Optional[float] = None
 
-
-def load_config_data(args: Namespace) -> tuple[DictConfig, list[pd.DataFrame]]:
-    """
-    Load the configuration and data and assumes
-    that the configuration file is in _train_configs
-    """
-
-    config = OmegaConf.load(f"_train_configs/{args.config}.yaml")
-    config = OmegaConf.merge(Args, config)
-
-    if hasattr(args, "cultivar"):
-        config.DataConfig.cultivar = args.cultivar if args.cultivar is not None else config.DataConfig.cultivar
-
-    return config, load_data_from_config(config)
-
-
-def load_config_data_fpath(
-    args: Namespace,
-) -> tuple[DictConfig, list[pd.DataFrame], str]:
-    """
-    Loads configuration file and data and returns
-    filepath to load model
-    """
-
-    fpath = f"{os.getcwd()}/{args.config}"
-
-    config = OmegaConf.load(f"{fpath}/config.yaml")
-    config = OmegaConf.merge(Args, config)
-
-    return config, load_data_from_config(config), fpath
 
 
 def load_config_fpath(
@@ -207,21 +174,6 @@ def load_data_from_config(config: DictConfig) -> list[pd.DataFrame]:
     return data
 
 
-def load_model_from_config(config: DictConfig, data: list[pd.DataFrame]) -> nn.Module:
-    """
-    Load the model to train using the configuration and pass
-    it args and data
-    """
-
-    if config.DConfig.type == "Param":
-        calibrator = DMC.ParamRNN(config, data)
-    elif config.DConfig.type == "NoObsParam":
-        calibrator = DMC.NoObsParamRNN(config, data)
-    else:
-        raise NotImplementedError(f"Unrecognized RNN model type `{config.DConfig.type}`")
-
-    return calibrator
-
 
 def load_inference_model_from_config(config: DictConfig, fpath: str, pt_file_name: str = "rnn_model.pt") -> nn.Module:
     """
@@ -237,25 +189,6 @@ def load_inference_model_from_config(config: DictConfig, fpath: str, pt_file_nam
         raise NotImplementedError(f"Unrecognized RNN model type `{config.DConfig.type}`")
 
     return calibrator
-
-
-def load_dfs(path: str) -> list[pd.DataFrame]:
-    """
-    Load dataframes from a filepath
-    """
-    df = pd.read_csv(path)
-
-    df["DAY"] = pd.to_datetime(df["DAY"])
-
-    inds = np.argwhere((df.DAY.dt.month == 1) & (df.DAY.dt.day == 1)).flatten()
-    inds = np.concatenate((inds, [-1]))
-    df_list = []
-    for i in range(1, len(inds)):
-        if inds[i] == -1:
-            df_list.append(df.loc[inds[i - 1] :])
-        else:
-            df_list.append(df.loc[inds[i - 1] : inds[i] - 1])
-    return df_list
 
 
 def find_config_yaml_dirs(start_dir="."):

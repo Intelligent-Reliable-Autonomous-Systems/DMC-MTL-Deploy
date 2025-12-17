@@ -21,8 +21,7 @@ def main():
 
     dmc_model = utils.load_inference_model_from_config(config, fpath, args.pt_file_name)
 
-    dmc_model.infer(np.arange(15), np.array(["2023-01-01"], dtype=np.datetime64), np.array([1]))
-
+    output = dmc_model.infer(np.arange(15), np.array(["2023-01-01"], dtype=np.datetime64), np.array([1]))
 
 if __name__ == "__main__":
     main()

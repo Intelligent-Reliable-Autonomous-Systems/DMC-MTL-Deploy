@@ -20,14 +20,11 @@ from datetime import date
 import os
 import numpy as np
 import torch
-import torch.nn.functional as F
 from traitlets_pcse import Instance, HasTraits
-import pandas as pd
 from omegaconf import DictConfig
 
 from model_engine.util import param_loader, get_models
-from model_engine.inputs.input_providers import DFTensorWeatherDataContainer, WeatherDataProvider
-from model_engine.models.base_model import BatchTensorModel
+from model_engine.inputs.input_providers import DFTensorWeatherDataContainer
 from model_engine.models.states_rates import VariableKiosk
 
 
@@ -36,12 +33,9 @@ class BaseEngine(HasTraits):
     Base Wrapper class for models
     """
 
-    inputdataprovider = Instance(WeatherDataProvider, allow_none=True)
-
     def __init__(
         self,
         config: DictConfig = None,
-        inputprovider: WeatherDataProvider = None,
         device: torch.device = "cpu",
     ) -> None:
         self.device = device
@@ -56,20 +50,15 @@ class BaseEngine(HasTraits):
 
         self.model_constr = get_models(f"{os.path.dirname(os.path.abspath(__file__))}/models")[config.model]
 
-        self.inputdataprovider = inputprovider
-
-    def run(self, dates: datetime.date = None, days: int = 1) -> torch.Tensor:
+    def run(self, dates: datetime.date = None) -> torch.Tensor:
         """
         Advances the system state with given number of days
         """
-        days_done = 0
-        while days_done < days:
-            days_done += 1
-            self._run(date=dates)
+        self._run(date=dates)
 
         return self.get_output()
 
-    def _run(self, date: datetime.date = None, cultivar: int = -1, delt: int = 1, **kwargs) -> None:
+    def _run(self, date: datetime.date = None) -> None:
         """
         Helper function for run. Implemented by subclasses
         """
@@ -80,13 +69,6 @@ class BaseEngine(HasTraits):
         Get names of valid states and ratse
         """
         return self.model.get_state_rates_names()
-
-    def get_input(self, day: datetime.date) -> np.ndarray:
-        """
-        Get the input to a model on the day
-        """
-
-        return np.array([getattr(self.inputdataprovider(day), v) for v in self.input_vars], dtype=object)
 
     def get_output(self) -> torch.Tensor:
         """
@@ -109,11 +91,10 @@ class BatchModelEngine(BaseEngine):
         self,
         num_models: int = 1,
         config: DictConfig = None,
-        inputprovider: WeatherDataProvider = None,
         device: torch.device = "cpu",
     ) -> None:
 
-        super().__init__(config, inputprovider, device)
+        super().__init__(config, device)
         self.num_models = num_models
         self.model = self.model_constr(
             self.start_date,
@@ -123,30 +104,25 @@ class BatchModelEngine(BaseEngine):
             num_models=self.num_models,
         )
 
-    def reset(self, num_models: int = 1, year: int = None, day: datetime.date = None) -> torch.Tensor:
+    def reset(self) -> torch.Tensor:
         """
         Reset the model
         """
-        if day is None:
-            if year is not None:
-                day = self.start_date.astype("M8[s]").astype(datetime.datetime).date()
-                self.day = np.datetime64(day.replace(year=year))
-            else:
-                self.day = self.start_date
-        else:
-            self.day = day
+
+        self.day = self.start_date
+
         self.model.reset(self.day)
 
-        return self.get_output()[:num_models]
+        return self.get_output()
 
     def run(
-        self, weather_data: torch.Tensor = None, dates: np.ndarray = None, cultivars: list[int] = None
+        self, weather_data: torch.Tensor = None, dates: np.ndarray = None
     ) -> torch.Tensor:
         """
         Advances the system state with given number of days
         """
 
-        self._run(weather_data=weather_data, dates=dates, cultivars=cultivars)
+        self._run(weather_data=weather_data, dates=dates)
 
         return self.get_output()[: len(dates)] if dates is not None else self.get_output()
 
@@ -154,54 +130,27 @@ class BatchModelEngine(BaseEngine):
         self,
         weather_data: torch.Tensor = None,
         dates: datetime.date = None,
-        cultivars: torch.Tensor = None,
         delt: float = 1,
     ) -> torch.Tensor:
         """
         Make one time step of the simulation.
         """
-        if weather_data is None:
-            self.day = dates
-
-            days = (
-                np.pad(
-                    self.day,
-                    (0, self.num_models - len(self.day)),
-                    mode="constant",
-                    constant_values=self.day[-1],
-                )
-                if len(self.day) < self.num_models
-                else self.day
+        n_pad = self.num_models - weather_data.shape[0]
+        days = (
+            np.pad(
+                dates,
+                (0, n_pad),
+                mode="constant",
+                constant_values=dates[-1],
             )
-            cultivars = (
-                F.pad(
-                    cultivars,
-                    (0, 0, 0, self.num_models - len(cultivars)),
-                    mode="constant",
-                    value=float(cultivars[-1].cpu().numpy().flatten()),
-                )
-                if len(cultivars) < self.num_models
-                else cultivars
-            )
-        else:
-            n_pad = self.num_models - weather_data.shape[0]
-            days = (
-                np.pad(
-                    dates,
-                    (0, self.num_models - len(dates)),
-                    mode="constant",
-                    constant_values=dates[-1],
-                )
-                if len(dates) < self.num_models
-                else dates
-            )
-            if n_pad > 0:
-                weather_data = np.vstack([weather_data, np.tile(weather_data[-1:], (n_pad, 1))])
-        if self.inputdataprovider is None:
-            weather = dict(zip(self.weather_input_vars, [w for w in weather_data.transpose()]))
-            drv = DFTensorWeatherDataContainer(device=self.device, **weather)
-        else:
-            drv = self.inputdataprovider(days, cultivars)
+            if n_pad > 0
+            else dates
+        )
+        if n_pad > 0:
+            weather_data = np.vstack([weather_data, np.tile(weather_data[-1:], (n_pad, 1))])
+            
+        weather = dict(zip(self.weather_input_vars, weather_data.transpose()))
+        drv = DFTensorWeatherDataContainer(device=self.device, **weather)
 
         self.calc_rates(days, drv)
         self.integrate(days, delt)

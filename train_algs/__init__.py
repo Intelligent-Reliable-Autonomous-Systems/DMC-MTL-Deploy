@@ -1,1 +1,1 @@
-from . import DMC
+from . import DMC_Inference
