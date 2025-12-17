@@ -8,14 +8,13 @@ Written by Will Solow, 2025
 
 import torch
 import torch.nn as nn
-import torch.optim as optim
-from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from omegaconf import DictConfig
-import pandas as pd
 import numpy as np
 import random
-from train_algs.base.process_data import process_data_inference, date_to_cyclic, normalize
+from inference_models.base.process_data import process_data_inference, date_to_cyclic, normalize
+from model_engine.util import CULTIVARS
+from inference_models.base.util import assert_yyyy_mm_dd
 
 
 class BaseInferenceModel(nn.Module):
@@ -39,16 +38,32 @@ class BaseInferenceModel(nn.Module):
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 
         assert cultivars.ndim == 1, "`cultivars` must be 1-dimensional"
-        assert dates.ndim == 1, "`dates` must be 1-dimensional"
+        assert dates.ndim == 1, "`dates` must be 1 dimensional"
+        assert self.curr_batch_size is not None, "Current batch size must not be None. Call `model.reset()` to set."
+
+        assert np.issubdtype(data.dtype, np.number), f"`data` must be of type `number` but if of type `{data.dtype}`"
+        assert np.issubdtype(cultivars.dtype, np.number) or np.issubdtype(cultivars.dtype, np.str_), f"`cultivars` must be of type `number` or `str` but if of type `{cultivars.dtype}`"
+        assert np.issubdtype(dates.dtype, np.datetime64) or np.issubdtype(dates.dtype, np.str_), f"`dates` must be of type `str` or `datetime64` but if of type `{dates.dtype}`"
+
+        dates = assert_yyyy_mm_dd(dates)
+
+        # Handles 
+        if np.issubdtype(cultivars.dtype, np.str_):
+            index_map = {v: i for i, v in enumerate(CULTIVARS[self.config.DataConfig.dtype])}
+            invalid = [x for x in cultivars if x not in index_map]
+            if invalid:
+                raise ValueError(f"Invalid cultivars: {invalid}")
+            cultivars = np.array([index_map[x] for x in cultivars])
 
         # Data check that data sizes are compatible
+
         if data.ndim == 1:
             data = np.expand_dims(data, axis=(0, 1))
         if data.ndim == 2:
             if data.shape[0] == dates.shape[0]:
                 data = np.expand_dims(data, axis=0)
             elif data.shape[0] == cultivars.shape[0]:
-                data = np.expand_dims(data, axis=0)
+                data = np.expand_dims(data, axis=1)
             else:
                 raise Exception(
                     f"Incompatible dimensions between data: {data.shape}, dates: {dates.shape} and cultivars: {cultivars.shape}."
@@ -57,6 +72,7 @@ class BaseInferenceModel(nn.Module):
         assert (
             data.shape[0] == cultivars.shape[0] and data.shape[1] == dates.shape[0]
         ), f"Shape mismatch betwen data: {data.shape}, dates: {dates.shape} and cultivars: {cultivars.shape}."
+        assert data.shape[0] == self.curr_batch_size, f"Dimension 0 of `data` must be equal to `curr_batch_size`. Expected {self.curr_batch_size} but got {data.shape[0]}"
 
         return data, dates, cultivars
 
@@ -72,7 +88,11 @@ class BaseInferenceModel(nn.Module):
         else:
             nn_data = torch.tensor(data).to(self.device)
         nn_data = normalize(nn_data, self.drange).to(torch.float32)
-        nn_cultivars = torch.tensor(cultivars).unsqueeze(0).to(self.device)
+
+        try: 
+            nn_cultivars = torch.tensor(cultivars).unsqueeze(0).to(self.device).to(torch.int)
+        except:
+            raise Exception(f"Unable to convert `cultivars`:{cultivars} into integer tensor.")
 
         return nn_data, dates[:, np.newaxis], nn_cultivars
 

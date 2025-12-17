@@ -1,2 +1,2 @@
 from . import util
-from . import train_algs
+from . import inference_models

@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from omegaconf import DictConfig
-from train_algs.base.util import set_embedding_op
+from inference_models.base.util import set_embedding_op
 from model_engine.util import CULTIVARS
 
 
@@ -21,10 +21,7 @@ class BaseModule(nn.Module):
         self.output_dim = model.get_output_dim(c)
         self.embed_dim = set_embedding_op(self)
 
-        if hasattr(model, "cultivars"):
-            cult_orig = torch.unique(torch.concatenate(list(model.cultivars.values()), axis=0)).to(torch.int)
-        else:
-            cult_orig = torch.arange(len(CULTIVARS))
+        cult_orig = torch.arange(len(CULTIVARS[c.DataConfig.dtype]))
         self.cult_mapping = torch.zeros((int(cult_orig.max()) + 1,)).to(torch.int).to(model.device)
         self.cult_mapping[cult_orig] = torch.arange(len(cult_orig)).to(torch.int).to(model.device)
 
@@ -57,7 +54,6 @@ class EmbeddingFCGRU(BaseModule):
         input: torch.Tensor = None,
         hn: torch.Tensor = None,
         cultivars: torch.Tensor = None,
-        **kwargs,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         cult_embed = self.cult_embedding_layer(self.cult_mapping[cultivars.flatten().to(torch.int)])
 

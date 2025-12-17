@@ -20,7 +20,7 @@ from torch import nn
 from omegaconf import OmegaConf, DictConfig
 from model_engine.util import CULTIVARS
 
-from train_algs import DMC_Inference
+from inference_models import DMC_Inference
 
 
 @dataclass
@@ -95,23 +95,6 @@ class Args:
     params_range: Optional[list] = None
 
 
-
-def load_config_fpath(
-    args: Namespace,
-) -> tuple[DictConfig, list[pd.DataFrame], str]:
-    """
-    Loads configuration file and data and returns
-    filepath to load model
-    """
-
-    fpath = f"{os.getcwd()}/{args.config}"
-
-    config = OmegaConf.load(f"{fpath}/config.yaml")
-    config = OmegaConf.merge(Args, config)
-
-    return config, fpath
-
-
 def load_data_from_config(config: DictConfig) -> list[pd.DataFrame]:
     """
     Loads data from a OmegaConf configuration file
@@ -175,20 +158,25 @@ def load_data_from_config(config: DictConfig) -> list[pd.DataFrame]:
 
 
 
-def load_inference_model_from_config(config: DictConfig, fpath: str, pt_file_name: str = "rnn_model.pt") -> nn.Module:
+def load_inference_model_from_config(args: Namespace) -> nn.Module:
     """
     Load the model to train using the configuration and pass
     it args and data
     """
 
+    fpath = f"{os.getcwd()}/{args.config}"
+
+    config = OmegaConf.load(f"{fpath}/config.yaml")
+    config = OmegaConf.merge(Args, config)
+
     if config.DConfig.type == "Param":
-        calibrator = DMC_Inference.InferenceParamRNN(config, fpath, pt_file_name=pt_file_name)
+        calibrator = DMC_Inference.InferenceParamRNN(config, fpath, pt_file_name=args.pt_file_name)
     elif config.DConfig.type == "NoObsParam":
-        calibrator = DMC_Inference.InferenceNoObsParamRNN(config, fpath, pt_file_name=pt_file_name)
+        calibrator = DMC_Inference.InferenceNoObsParamRNN(config, fpath, pt_file_name=args.pt_file_name)
     else:
         raise NotImplementedError(f"Unrecognized RNN model type `{config.DConfig.type}`")
 
-    return calibrator
+    return calibrator, config
 
 
 def find_config_yaml_dirs(start_dir="."):
