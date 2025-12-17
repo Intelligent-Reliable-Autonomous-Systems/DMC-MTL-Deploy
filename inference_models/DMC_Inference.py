@@ -19,6 +19,7 @@ from inference_models.base.base import BaseInferenceModel
 from model_engine.util import per_task_param_loader
 from model_engine.engine import BatchModelEngine
 
+import copy
 
 class BaseInferenceRNN(BaseInferenceModel):
 
@@ -71,7 +72,7 @@ class InferenceParamRNN(BaseInferenceRNN):
         self.curr_batch_size = batch_size
         self.nn.zero_grad()
         self.model.reset()
-        self.hn = self.nn.get_init_state()
+        self.hn = self.nn.get_init_state(batch_size)
 
     def predict(self, data: np.ndarray, dates: np.ndarray, cultivars: np.ndarray) -> np.ndarray:
         """
@@ -95,18 +96,18 @@ class InferenceParamRNN(BaseInferenceRNN):
 
         # Go through every day in the data array and predict parameters + model output
         for i in range(nn_data.shape[1]):
-            params_predict, self.hn = self.nn(
-                torch.cat((model_output.view(model_output.shape[0], -1).detach(), nn_data[:, i]), dim=-1),
-                hn=self.hn,
-                cultivars=nn_cultivars,
-            )
-
-            params_predict = self.param_cast(params_predict)
-            self.model.set_model_params(params_predict, self.params)
-            output = self.model.run(weather_data=data[:, i], dates=dates[:, i])[:self.curr_batch_size]
-            output_tens[:, i] = output
-
-        return output_tens.detach().cpu().numpy()
+            with torch.no_grad(): 
+                params_predict, self.hn = self.nn(
+                    torch.cat((model_output.view(model_output.shape[0], -1).detach(), nn_data[:, i]), dim=-1),
+                    hn=self.hn,
+                    cultivars=nn_cultivars,
+                )
+                params_predict = self.param_cast(params_predict)
+                self.model.set_model_params(params_predict, self.params)
+                model_output = self.model.run(weather_data=data[:, i], dates=dates[i])[:self.curr_batch_size]
+                output_tens[:, i] = model_output
+  
+        return output_tens.detach().cpu().numpy(), self.hn
     
     def forecast(self, data: np.ndarray, dates: np.ndarray, cultivars: np.ndarray) -> np.ndarray:
         """
@@ -130,21 +131,22 @@ class InferenceParamRNN(BaseInferenceRNN):
         output_tens = torch.empty(size=(data.shape[0], data.shape[1], len(self.output_vars))).to(self.device)
 
         # Save current state of model 
-        curr_model_state = self.model.get_state()
+        curr_model_state = copy.deepcopy(self.model.get_state())
         curr_hn = self.hn.clone()
 
         # Go through every day in the data array and predict parameters + model output
         for i in range(nn_data.shape[1]):
-            params_predict, curr_hn = self.nn(
-                torch.cat((model_output.view(model_output.shape[0], -1).detach(), nn_data[:, i]), dim=-1),
-                cultivars=nn_cultivars,
-                hn=curr_hn
-            )
+            with torch.no_grad():
+                params_predict, curr_hn = self.nn(
+                    torch.cat((model_output.view(model_output.shape[0], -1).detach(), nn_data[:, i]), dim=-1),
+                    cultivars=nn_cultivars,
+                    hn=curr_hn
+                )
 
-            params_predict = self.param_cast(params_predict)
-            self.model.set_model_params(params_predict, self.params)
-            output = self.model.run(weather_data=data[:, i], dates=dates[:, i])
-            output_tens[:, i] = output
+                params_predict = self.param_cast(params_predict)
+                self.model.set_model_params(params_predict, self.params)
+                model_output = self.model.run(weather_data=data[:, i], dates=dates[i])
+                output_tens[:, i] = model_output
 
         # Reset model internal state
         self.model.set_state(curr_model_state)

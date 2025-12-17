@@ -129,12 +129,6 @@ class BaseInferenceModel(nn.Module):
         """
         torch.save(self.nn.state_dict(), f"{path}/{name}")
 
-    def load_model(self, path: str, name: str = "rnn_model.pt") -> None:
-        """
-        Load Model
-        """
-        self.nn.load_state_dict(torch.load(f"{path}/{name}", weights_only=True, map_location=self.device), strict=False)
-
     def param_cast(self, params: torch.Tensor, prev_params: torch.Tensor = None) -> torch.Tensor:
         """
         Performs TanH activiation on parameters to cast to range
