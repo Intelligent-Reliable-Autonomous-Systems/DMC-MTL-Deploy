@@ -73,11 +73,11 @@ The DMC-MTL base model requires access to 15 weather variables and the date in a
 
 ### Model Outputs
 For both the `predict()` and `forecast()` methods, the output of the model will be one of [0, 1, 2, 3, 4] where:
-    - 0: The grape is in Ecodormancy
-    - 1: The grape is in Bud Break
-    - 2: The grape is in Bloom
-    - 3: The grape is in Veraison 50%
-    - 4: The grape is in Ripe/Harvest
+- 0: The grape is in Ecodormancy
+- 1: The grape is in Bud Break
+- 2: The grape is in Bloom
+- 3: The grape is in Veraison 50%
+- 4: The grape is in Ripe/Harvest
 
 For forecasting purposes, the first occurance of a new integer corresponds to a new phenological stage being reached/the day of onset. For example, if the return of a forecast call with the dates [2025-05-01, 2025-05-02, 2025-05-03] returned [[[0,1,1]]], this means that the model forecasts that Bud Break will occur on 25-05-02. 
 
