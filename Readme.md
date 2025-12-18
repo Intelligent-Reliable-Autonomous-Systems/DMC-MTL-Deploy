@@ -89,3 +89,17 @@ The Ripe/Harvest value can be ignored. The DMC-MTL model predicts the average da
 
 2. Cold Hardiness: Barbera, Cabernet Franc, Cabernet Sauvignon, Chardonnay, Chenin Blanc, Concord, Gewurztraminer, Grenache, Lemberger, Malbec, Merlot, Mourvedre, Nebbiolo, Pinot Gris, Riesling, Sangiovese, Sauvignon Blanc, Semillon, Syrah, Viognier, Zinfandel
 
+### Hosting this model on AWN
+Right now, this repository includes the `_data/` folder which includes the processed Prosser LTE50 and Phenology data. This is unneeded for inference and can be deleted (only needed for demonstration). The `_runs/` folder includes 10 different .pt models, five for phenology and five for cold-hardiness. Any of the phenology models can be used, and all other models could be deleted to save space. 
+
+I envision a setup where: 
+1. At the start of the season the reset() function is called. It may be easiest to run a single cultivar at a time, in which case dmc_model.reset(1) should be called and there should be a model created for each cultivar. 
+
+2. Each day `predict(weather_data, ["Current Date in YYYY-MM-DD"], [Cultivar Name/ID])` is called which outputs the phenology prediction on that day. The weather_data is the observed weather data for that day.
+
+3. Each day `forecast(forecast_weather_data, ["List of Forecast Dates in YYYY-MM-DD"], [Cultivar Name/ID]) is called which outputs the phenology forecast for those k days. The forecast_weather_data is the AWN forecasted weather data. 
+
+Important notes:
+1. The weather data must be in the correct units and order (see Model Inputs section)
+2. predict() must be called every day, or if it is called every t days, it is passed the weather for those previous t days with the corresponding dates. Otherwise the model will not advance. 
+
