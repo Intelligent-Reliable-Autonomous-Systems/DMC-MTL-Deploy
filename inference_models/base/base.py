@@ -49,6 +49,7 @@ class BaseInferenceModel(nn.Module):
 
         # Handles 
         if np.issubdtype(cultivars.dtype, np.str_):
+            cultivars = np.array([c.replace(" ", "_") for c in cultivars])
             index_map = {v: i for i, v in enumerate(CULTIVARS[self.config.DataConfig.dtype])}
             invalid = [x for x in cultivars if x not in index_map]
             if invalid:

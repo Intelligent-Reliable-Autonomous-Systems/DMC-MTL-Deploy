@@ -107,7 +107,7 @@ class InferenceParamRNN(BaseInferenceRNN):
                 model_output = self.model.run(weather_data=data[:, i], dates=dates[i])[:self.curr_batch_size]
                 output_tens[:, i] = model_output
   
-        return output_tens.detach().cpu().numpy(), self.hn
+        return output_tens.detach().cpu().numpy()
     
     def forecast(self, data: np.ndarray, dates: np.ndarray, cultivars: np.ndarray) -> np.ndarray:
         """

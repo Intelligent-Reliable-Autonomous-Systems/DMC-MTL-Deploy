@@ -1,0 +1,73 @@
+PConfig:
+  config_fpath: _configs_models/
+  model: Grape_ColdHardiness_TensorBatch
+  model_parameters: grape_coldhardiness:1
+  latitude: 46
+  longitude: -120
+  start_date: '2023-01-01'
+  output_vars:
+  - LTE50
+  input_vars:
+  - DAY
+  - TEMP
+  - TMIN
+  - TMAX
+  - RAIN
+  - IRRAD
+  - DAYL
+  - MIN_RH
+  - AVG_RH
+  - MAX_RH
+  - MIN_DEWPT
+  - AVG_DEWPT
+  - MAX_DEWPT
+  - WS_MPH
+  - MAX_WS_MPH
+  - ETO
+DConfig:
+  type: Param
+  hidden_dim: 1024
+  arch: EmbedFCGRU
+  learning_rate: 0.0002
+  lr_factor: 0.95
+  batch_size: 12
+  epochs: 400
+DataConfig: 
+  cultivar: All
+  data_fpath: _data/processed_data/
+  dtype: grape_coldhardiness_
+params:
+- HCINIT
+- HCMIN
+- HCMAX
+- TENDO
+- TECO
+- ENACCLIM
+- ECACCLIM
+- ENDEACCLIM
+- ECDEACCLIM
+- ECOBOUND
+params_range:
+- - -15
+  - -5
+- - -5
+  - 0
+- - -40
+  - -20
+- - 10
+  - 20
+- - 0
+  - 10
+- - 0
+  - 0.2
+- - 0
+  - 0.2
+- - 0
+  - 0.2
+- - 0
+  - 0.2
+- - -800
+  - -200
+log_path: /_runs/PaperExperiments/ColdHardiness/ParamMTL/
+run_name: paramMTL
+seed: 0
